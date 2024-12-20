@@ -1,15 +1,24 @@
 ---
 import BaseLayout from "../layouts/BaseLayouts.astro";
 import BlogPost from "../components/BlogPost.astro";
-const allPosts = await Astro.glob("./posts/*.md");
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection("blog");
+const processedPosts = allPosts.map((post) => ({
+  ...post,
+  data: {
+    ...post.data,
+    title: post.data.title || post.id.replace(/\.md$/, "").split("/").pop(),
+  },
+}));
 ---
 
 <BaseLayout pageTitle="我的 Astro 学习博客">
   <p>这是我的 Astro 学习笔记</p>
   <ul>
     {
-      allPosts.map((post) => (
-        <BlogPost url={post.url} title={post.frontmatter.title} />
+      processedPosts.map((post) => (
+        <BlogPost url={`/blog/${post.slug}`} title={post.data.title} />
       ))
     }
   </ul>
